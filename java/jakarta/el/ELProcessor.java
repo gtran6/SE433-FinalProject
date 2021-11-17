@@ -192,13 +192,17 @@ public class ELProcessor {
 
         // Check for static, public method and module access for Java 9+
         JreCompat jreCompat = JreCompat.getInstance();
+        extracted(method, modifiers, jreCompat); // refactored
+
+        manager.mapFunction(prefix, function, method);
+    }
+
+    private void extracted(Method method, int modifiers, JreCompat jreCompat) throws NoSuchMethodException {
         if (!Modifier.isStatic(modifiers) || !jreCompat.canAccess(null, method)) {
             throw new NoSuchMethodException(Util.message(context,
                     "elProcessor.defineFunctionInvalidMethod", method.getName(),
                     method.getDeclaringClass().getName()));
         }
-
-        manager.mapFunction(prefix, function, method);
     }
 
 
@@ -278,36 +282,7 @@ public class ELProcessor {
                         boolean isPrimitive = PRIMITIVES.contains(parameterTypeName);
                         if (isPrimitive && dimension > 0) {
                             // When in an array, class name changes for primitive
-                            switch(parameterTypeName)
-                            {
-                                case "boolean":
-                                    parameterTypeName = "Z";
-                                    break;
-                                case "byte":
-                                    parameterTypeName = "B";
-                                    break;
-                                case "char":
-                                    parameterTypeName = "C";
-                                    break;
-                                case "double":
-                                    parameterTypeName = "D";
-                                    break;
-                                case "float":
-                                    parameterTypeName = "F";
-                                    break;
-                                case "int":
-                                    parameterTypeName = "I";
-                                    break;
-                                case "long":
-                                    parameterTypeName = "J";
-                                    break;
-                                case "short":
-                                    parameterTypeName = "S";
-                                    break;
-                                default:
-                                    // Should never happen
-                                    break;
-                            }
+                            parameterTypeName = getParameterTypeName(parameterTypeName); // refactored
                         } else  if (!isPrimitive &&
                                 !parameterTypeName.contains(".")) {
                             Class<?> clazz = importHandler.resolveClass(
@@ -344,6 +319,40 @@ public class ELProcessor {
                 }
             }
 
+        }
+
+        private String getParameterTypeName(String parameterTypeName) {
+            switch(parameterTypeName)
+            {
+                case "boolean":
+                    parameterTypeName = "Z";
+                    break;
+                case "byte":
+                    parameterTypeName = "B";
+                    break;
+                case "char":
+                    parameterTypeName = "C";
+                    break;
+                case "double":
+                    parameterTypeName = "D";
+                    break;
+                case "float":
+                    parameterTypeName = "F";
+                    break;
+                case "int":
+                    parameterTypeName = "I";
+                    break;
+                case "long":
+                    parameterTypeName = "J";
+                    break;
+                case "short":
+                    parameterTypeName = "S";
+                    break;
+                default:
+                    // Should never happen
+                    break;
+            }
+            return parameterTypeName;
         }
 
         public String getName() {
