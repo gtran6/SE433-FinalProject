@@ -306,11 +306,9 @@ public class ImportHandler {
 
         for (Field field : clazz.getFields()) {
             if (field.getName().equals(fieldOrMethodName)) {
-                int modifiers = field.getModifiers();
-                if (Modifier.isStatic(modifiers) &&
-                        Modifier.isPublic(modifiers)) {
-                    found = true;
-                    break;
+                Modifiers modifiers1 = new Modifiers(found, method).invoke(); //refactor
+                if (modifiers1.is()) break;
+                found = modifiers1.isFound();
                 }
             }
         }
@@ -318,12 +316,9 @@ public class ImportHandler {
         if (!found) {
             for (Method method : clazz.getMethods()) {
                 if (method.getName().equals(fieldOrMethodName)) {
-                    int modifiers = method.getModifiers();
-                    if (Modifier.isStatic(modifiers) &&
-                            Modifier.isPublic(modifiers)) {
-                        found = true;
-                        break;
-                    }
+                    Modifiers modifiers2 = new Modifiers(found, method).invoke(); //refactor
+                    if (modifiers2.is()) break;
+                    found = modifiers2.isFound();
                 }
             }
         }
@@ -522,6 +517,37 @@ public class ImportHandler {
             } else {
                 return Boolean.TRUE;
             }
+        }
+    }
+
+    private class Modifiers {
+        private boolean myResult;
+        private boolean found;
+        private Method method;
+
+        public Modifiers(boolean found, Method method) {
+            this.found = found;
+            this.method = method;
+        }
+
+        boolean is() {
+            return myResult;
+        }
+
+        public boolean isFound() {
+            return found;
+        }
+
+        public Modifiers invoke() {
+            int modifiers = method.getModifiers();
+            if (Modifier.isStatic(modifiers) &&
+                    Modifier.isPublic(modifiers)) {
+                found = true;
+                myResult = true;
+                return this;
+            }
+            myResult = false;
+            return this;
         }
     }
 }

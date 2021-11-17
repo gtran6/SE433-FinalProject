@@ -39,8 +39,9 @@ public class CompositeELResolver extends ELResolver {
     private ELResolver[] resolvers;
 
     public CompositeELResolver() {
+        int resolverNumber = 8;
         this.size = 0;
-        this.resolvers = new ELResolver[8];
+        this.resolvers = new ELResolver[resolverNumber]; // fix magic number
     }
 
     public void add(ELResolver elResolver) {
@@ -143,8 +144,10 @@ public class CompositeELResolver extends ELResolver {
         int sz = this.size;
         for (int i = 0; i < sz; i++) {
             Class<?> type = this.resolvers[i].getCommonPropertyType(context, base);
-            if (type != null && (commonType == null || commonType.isAssignableFrom(type))) {
-                commonType = type;
+            if (type != null) {
+                if (commonType == null || commonType.isAssignableFrom(type)) {
+                    commonType = type;
+                }
             }
         }
         return commonType;

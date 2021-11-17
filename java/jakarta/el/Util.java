@@ -339,6 +339,10 @@ class Util {
 
         // Look for the method that has the highest number of parameters where
         // the type matches exactly
+        return getWrapper(clazz, name, paramTypes, candidates, paramCount); //refactored
+    }
+
+    private static <T> jakarta.el.Util.Wrapper<T> getWrapper(Class<?> clazz, String name, Class<?>[] paramTypes, Map<Wrapper<T>, MatchResult> candidates, int paramCount) throws MethodNotFoundException {
         MatchResult bestMatch = new MatchResult(true, 0, 0, 0, 0, true);
         Wrapper<T> match = null;
         boolean multiple = false;
@@ -361,23 +365,23 @@ class Util {
                 match = null;
             }
 
-            if (match == null) {
-                // If multiple methods have the same matching number of parameters
-                // the match is ambiguous so throw an exception
-                throw new MethodNotFoundException(message(
-                        null, "util.method.ambiguous", clazz, name,
-                        paramString(paramTypes)));
-            }
+            extracted(clazz, name, paramTypes, match); //refactord
         }
 
         // Handle case where no match at all was found
-        if (match == null) {
-            throw new MethodNotFoundException(message(
-                        null, "util.method.notfound", clazz, name,
-                        paramString(paramTypes)));
-        }
+        extracted(clazz, name, paramTypes, match); // refactored
 
         return match;
+    }
+
+    private static <T> void extracted(Class<?> clazz, String name, Class<?>[] paramTypes, jakarta.el.Util.Wrapper<T> match) throws MethodNotFoundException {
+        if (match == null) {
+            // If multiple methods have the same matching number of parameters
+            // the match is ambiguous so throw an exception
+            throw new MethodNotFoundException(message(
+                    null, "util.method.ambiguous", clazz, name,
+                    paramString(paramTypes)));
+        }
     }
 
 
