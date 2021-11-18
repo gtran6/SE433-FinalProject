@@ -697,34 +697,39 @@ public abstract class AuthenticatorBase extends ValveBase
                                 // Look at Filter configuration for the Context
                                 // Can't cache this unless we add a listener to
                                 // the Context to clear the cache on reload
-                                for (FilterDef filterDef : request.getContext().findFilterDefs()) {
-                                    if (CorsFilter.class.getName().equals(filterDef.getFilterClass())) {
-                                        for (FilterMap filterMap : context.findFilterMaps()) {
-                                            if (filterMap.getFilterName().equals(filterDef.getFilterName())) {
-                                                if ((filterMap.getDispatcherMapping() & FilterMap.REQUEST) > 0) {
-                                                    for (String urlPattern : filterMap.getURLPatterns()) {
-                                                        if ("/*".equals(urlPattern)) {
-                                                            allowBypass = true;
-                                                            // No need to check other patterns
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                                // Found mappings for CORS filter.
-                                                // No need to look further
-                                                break;
-                                            }
-                                        }
-                                        // Found the CORS filter. No need to look further.
-                                        break;
-                                    }
-                                }
+                                allowBypass = isAllowBypass(request, allowBypass); // refactored
                             }
                         } else {
                             // Unexpected enum type
                         }
                     }
                 }
+            }
+        }
+        return allowBypass;
+    }
+
+    private boolean isAllowBypass(Request request, boolean allowBypass) {
+        for (FilterDef filterDef : request.getContext().findFilterDefs()) {
+            if (CorsFilter.class.getName().equals(filterDef.getFilterClass())) {
+                for (FilterMap filterMap : context.findFilterMaps()) {
+                    if (filterMap.getFilterName().equals(filterDef.getFilterName())) {
+                        if ((filterMap.getDispatcherMapping() & FilterMap.REQUEST) > 0) {
+                            for (String urlPattern : filterMap.getURLPatterns()) {
+                                if ("/*".equals(urlPattern)) {
+                                    allowBypass = true;
+                                    // No need to check other patterns
+                                    break;
+                                }
+                            }
+                        }
+                        // Found mappings for CORS filter.
+                        // No need to look further
+                        break;
+                    }
+                }
+                // Found the CORS filter. No need to look further.
+                break;
             }
         }
         return allowBypass;
