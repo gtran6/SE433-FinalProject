@@ -651,19 +651,18 @@ public class ManagerServlet extends HttpServlet implements ContainerServlet {
     private void sslConnectorCerts(PrintWriter writer, StringManager smClient) {
         writer.println(smClient.getString("managerServlet.sslConnectorCerts"));
         Map<String,List<String>> connectorCerts = getConnectorCerts(smClient);
-        for (Map.Entry<String,List<String>> entry : connectorCerts.entrySet()) {
-            writer.println(entry.getKey());
-            for (String cert : entry.getValue()) {
-                writer.println(cert);
-            }
-        }
+        extracted(writer, (java.util.Map<java.lang.String, java.util.List<java.lang.String>>) connectorCerts); //refactored
     }
 
 
     private void sslConnectorTrustedCerts(PrintWriter writer, StringManager smClient) {
         writer.println(smClient.getString("managerServlet.sslConnectorTrustedCerts"));
         Map<String,List<String>> connectorTrustedCerts = getConnectorTrustedCerts(smClient);
-        for (Map.Entry<String,List<String>> entry : connectorTrustedCerts.entrySet()) {
+        extracted((PrintWriter) writer, connectorTrustedCerts);
+    }
+
+    private void extracted(PrintWriter writer, Map<String, List<String>> connectorTrustedCerts) {
+        for (Map.Entry<String, List<String>> entry : connectorTrustedCerts.entrySet()) {
             writer.println(entry.getKey());
             for (String cert : entry.getValue()) {
                 writer.println(cert);
